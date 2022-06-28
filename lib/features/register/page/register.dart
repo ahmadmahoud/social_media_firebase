@@ -11,7 +11,10 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:social_firebase/core/constants.dart';
 import 'package:social_firebase/core/cubit/cubit.dart';
 import 'package:social_firebase/core/cubit/state.dart';
+import 'package:social_firebase/core/di/injection.dart';
+import 'package:social_firebase/core/network/local/cache_helper.dart';
 import 'package:social_firebase/core/widget/main_scaffold.dart';
+import 'package:social_firebase/features/home/widget/iconBroken.dart';
 import 'package:social_firebase/features/register/splash_screen/splash_screen.dart';
 import 'package:social_firebase/features/register/wedget/app_button.dart';
 import 'package:social_firebase/features/register/wedget/app_text_form_field.dart';
@@ -42,6 +45,7 @@ class _RegisterPageState extends State<RegisterPage> {
       listener: (context, state) {
         if(state is CreateUserSuccessState) {
           navigateAndFinish(context, const SplashScreen());
+          sl<CacheHelper>().put('uid', uIdUser);
           return;
         }
         if (state is Error) {

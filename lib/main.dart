@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_firebase/core/constants.dart';
@@ -6,12 +7,18 @@ import 'package:social_firebase/core/cubit/MyBlocObserver.dart';
 import 'package:social_firebase/core/cubit/cubit.dart';
 import 'package:social_firebase/core/cubit/state.dart';
 import 'package:social_firebase/core/di/injection.dart';
-import 'package:social_firebase/core/network/local/cache.dart';
 import 'package:social_firebase/core/di/injection.dart' as di;
+import 'package:social_firebase/core/network/local/cache.dart';
 import 'package:social_firebase/core/network/local/cache_helper.dart';
 import 'package:social_firebase/features/home/page/homePage.dart';
 import 'package:social_firebase/features/login/page/login.dart';
-import 'package:social_firebase/features/register/page/register.dart';
+
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async
+{
+  print('on background message');
+  print(message.data.toString());
+  showToast(message: 'on background message', toastStates: ToastStates.SUCCESS,);
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +26,31 @@ void main() async {
   await Firebase.initializeApp();
   await di.init();
   await CacheHelperw.init();
+
+  var tokenFCM = await FirebaseMessaging.instance.getToken();
+  print('tken fcm : $tokenFCM');
+
+  // onUseApp
+  FirebaseMessaging.onMessage.listen((event)
+  {
+    print('on message');
+    print(event.data.toString());
+    showToast(message: 'on message', toastStates: ToastStates.SUCCESS,);
+  });
+
+  //background (pause or minimize app)
+  FirebaseMessaging.onMessageOpenedApp.listen((event)
+  {
+    print('on message opened app');
+    print(event.data.toString());
+    showToast(message: 'on message opened app', toastStates: ToastStates.SUCCESS,);
+  });
+
+  // background fcm (destroy or close app)
+  FirebaseMessaging.onBackgroundMessage(
+      // methode work with destroy or close app
+      firebaseMessagingBackgroundHandler);
+
 
   bool isDark = false;
   await sl<CacheHelper>().get('isDark').then((value) {
@@ -31,10 +63,11 @@ void main() async {
   });
 
   Widget widget;
-  await sl<CacheHelper>().get('uId').then((value) {
+  await sl<CacheHelper>().get('uid').then((value) {
+    debugPrint('uid --------- $value');
     if (value != null) {
       uIdUser = value;
-      print('u id $uIdUser');
+
     } else {
       uIdUser = null;
     }
@@ -42,7 +75,6 @@ void main() async {
 
   if (uIdUser != null) {
     widget = const HomeScreen();
-    print(uIdUser);
   } else {
     widget = const LoginPage();
   }
@@ -63,7 +95,9 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       create: (context) => sl<MainBloc>()
         ..setThemes(change: isDark)
-        ..getUserDate(),
+        ..getUserDate()
+        ..getPosts()
+        ..getUsers(),
       child: BlocBuilder<MainBloc, MainState>(
         builder: (context, state) {
           return MaterialApp(

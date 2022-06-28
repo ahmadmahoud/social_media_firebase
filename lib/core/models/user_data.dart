@@ -2,23 +2,29 @@ class UserModel {
   String? name;
   String? email;
   String? phone;
+  String? image;
+  String? cover;
+  String? bio;
   String? uId;
-  String? imageUrl;
 
   UserModel({
     this.name,
     this.email,
     this.phone,
+    this.image,
+    this.cover,
+    this.bio,
     this.uId,
-    this.imageUrl,
   });
 
   UserModel.fromMap(Map<String, dynamic> json) {
-    name = json['name'];
-    email = json['email'];
-    phone = json['phone'];
-    uId = json['uId'];
-    imageUrl = json['imageUrl'];
+    name = json['name'] ?? '';
+    email = json['email'] ?? '';
+    phone = json['phone'] ?? '';
+    image = json['image'] ?? '';
+    cover = json['cover'] ?? '';
+    bio = json['bio'] ?? '';
+    uId = json['uId'] ?? '';
   }
 
   Map<String, dynamic> toMap() => {
@@ -26,6 +32,8 @@ class UserModel {
     'email': email,
     'phone': phone,
     'uId': uId,
-    'imageUrl': imageUrl,
+    'bio': bio,
+    'image': image,
+    'cover': cover,
   };
 }

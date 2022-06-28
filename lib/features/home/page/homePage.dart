@@ -9,19 +9,35 @@ import 'package:social_firebase/core/cubit/state.dart';
 import 'package:social_firebase/core/models/user_data.dart';
 import 'package:social_firebase/core/widget/loading.dart';
 import 'package:social_firebase/core/widget/main_scaffold.dart';
+import 'package:social_firebase/features/home/widget/iconBroken.dart';
 import 'package:social_firebase/features/home/widget/text_button.dart';
+import 'package:social_firebase/features/new_post/new_post.dart';
+import 'package:social_firebase/features/settings/notification/notification.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MainBloc, MainState>(
+    return BlocConsumer<MainBloc, MainState>(
+      listener: (context, state) {
+        if (state is SocialNewPostState) {
+          navigateTo(
+            context,
+            const NewPostPage(),
+          );
+        }
+      },
       builder: (context, state) {
         var cubit = MainBloc.get(context);
         return MainScaffold(
           scaffold: Scaffold(
             appBar: AppBar(
+              actions: [
+                IconButton(onPressed: (){
+                  navigateTo(context, NotificationPage());
+                }, icon: const Icon(IconBroken.Notification,color: Colors.black,size: 28,)),
+              ],
               title: Text(cubit.titles[cubit.currentIndex],
               style: Theme.of(context).textTheme.bodyText2,),
               centerTitle: true,
@@ -32,7 +48,7 @@ class HomeScreen extends StatelessWidget {
                 fallback: (_) => const LoadingPage()),
               bottomNavigationBar: BottomNavigationBar(
                 onTap: (index) {
-                  cubit.changeBottomNavigationBar(index);
+                  cubit.changeBottomNav(index);
                 },
                 items: cubit.bottomItems,
                 currentIndex: cubit.currentIndex,
